@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Learning Hub - Exercises</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; background:#f7f7f7; color:#333; }
+header { background:#0055a5; color:#fff; padding:1rem; text-align:center; }
+main { max-width:900px; margin:2rem auto; background:#fff; padding:2rem; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+nav.tab-nav { display:flex; justify-content:center; margin-bottom:1rem; gap:1rem; flex-wrap:wrap;}
+nav.tab-nav button { background:#e0e0e0; color:#333; padding:8px 15px; border-radius:5px; border:none; cursor:pointer;}
+nav.tab-nav button.active { background:#0055a5; color:white; }
+.tab { display:none; }
+.tab.active { display:block; }
+.exercise-card { border:1px solid #ccc; padding:20px; border-radius:10px; margin-bottom:1rem; background:#f9f9f9; text-align:center;}
+button { background:#0055a5; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; margin-top:10px;}
+button:hover { background:#003f7a; }
+select,input { padding:5px; border-radius:5px; border:1px solid #ccc; margin:5px 0; width:90%; max-width:300px;}
+.correct { color:green; font-weight:bold; }
+.wrong { color:red; font-weight:bold; }
+#exercise-navigation { margin-top:1rem; display:flex; justify-content:center; gap:10px; }
+#progress { margin-bottom:1rem; font-weight:bold; }
+</style>
+</head>
+<body>
+<header>
+  <h1>English Learning Hub</h1>
+</header>
+
+<main>
+  <nav class="tab-nav">
+    <button onclick="showTab('verbs-tab')" class="active">Irregular Verbs</button>
+    <button onclick="showTab('vocab-tab')">Vocabulary</button>
+    <button onclick="showTab('idioms-tab')">Idioms</button>
+    <button onclick="showTab('formative-tab')">Formative Test</button>
+  </nav>
+
+  <!-- IRREGULAR VERBS -->
+  <div id="verbs-tab" class="tab active">
+    <h2>Irregular Verbs</h2>
+    <div id="verbs-home" class="exercise-card">
+      <p>Practice your irregular verbs!</p>
+      <button onclick="startExercise('verbs')">Start</button>
+    </div>
+    <div id="verbs-exercise" class="exercise-card" style="display:none;">
+      <div id="progress"></div>
+      <div id="verb-question"></div>
+      <div id="exercise-navigation">
+        <button onclick="submitAnswer()">Done</button>
+        <button onclick="quitExercise()">Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOCABULARY -->
+  <div id="vocab-tab" class="tab">
+    <h2>Vocabulary</h2>
+    <div id="vocab-home" class="exercise-card">
+      <p>Match words to their categories!</p>
+      <button onclick="startExercise('vocab')">Start</button>
+    </div>
+    <div id="vocab-exercise" class="exercise-card" style="display:none;">
+      <div id="progress"></div>
+      <div id="vocab-question"></div>
+      <div id="exercise-navigation">
+        <button onclick="submitAnswer()">Done</button>
+        <button onclick="quitExercise()">Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDIOMS -->
+  <div id="idioms-tab" class="tab">
+    <h2>Idioms</h2>
+    <div id="idioms-home" class="exercise-card">
+      <p>Match idioms to their meanings!</p>
+      <button onclick="startExercise('idioms')">Start</button>
+    </div>
+    <div id="idioms-exercise" class="exercise-card" style="display:none;">
+      <div id="progress"></div>
+      <div id="idiom-question"></div>
+      <div id="exercise-navigation">
+        <button onclick="submitAnswer()">Done</button>
+        <button onclick="quitExercise()">Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMATIVE TEST -->
+  <div id="formative-tab" class="tab">
+    <h2>Formative Test</h2>
+    <div id="formative-home" class="exercise-card">
+      <p>Test your knowledge across all exercises!</p>
+      <button onclick="startExercise('formative')">Start Test</button>
+    </div>
+    <div id="formative-exercise" class="exercise-card" style="display:none;">
+      <div id="progress"></div>
+      <div id="formative-question"></div>
+      <div id="exercise-navigation">
+        <button onclick="submitAnswer()">Done</button>
+        <button onclick="quitExercise()">Quit</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* --- TAB FUNCTION --- */
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab-nav button').forEach(btn=>btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+/* --- EXERCISES --- */
+const verbExercises = [
+  {verb:"arise", past:"arose", participle:"arisen"},
+  {verb:"begin", past:"began", participle:"begun"},
+  {verb:"choose", past:"chose", participle:"chosen"},
+  {verb:"do", past:"did", participle:"done"},
+  {verb:"eat", past:"ate", participle:"eaten"},
+  {verb:"fall", past:"fell", participle:"fallen"},
+  {verb:"get", past:"got", participle:"gotten"},
+  {verb:"go", past:"went", participle:"gone"},
+  {verb:"have", past:"had", participle:"had"},
+  {verb:"know", past:"knew", participle:"known"},
+  {verb:"make", past:"made", participle:"made"},
+  {verb:"meet", past:"met", participle:"met"},
+  {verb:"put", past:"put", participle:"put"},
+  {verb:"read", past:"read", participle:"read"},
+  {verb:"run", past:"ran", participle:"run"},
+  {verb:"see", past:"saw", participle:"seen"},
+  {verb:"sit", past:"sat", participle:"sat"},
+  {verb:"sleep", past:"slept", participle:"slept"},
+  {verb:"take", past:"took", participle:"taken"},
+  {verb:"write", past:"wrote", participle:"written"}
+];
+
+const vocabExercises = [
+  {word:"bolted", category:"FAST MOVEMENT"},
+  {word:"darted", category:"FAST MOVEMENT"},
+  {word:"trotted", category:"MEDIUM-PACED MOVEMENT"},
+  {word:"glided", category:"MEDIUM-PACED MOVEMENT"},
+  {word:"ambled", category:"SLOW MOVEMENT"},
+  {word:"yanked", category:"ACTION VERBS TO PULL"},
+  {word:"wrestled", category:"ACTION VERBS TO PULL"},
+  {word:"appeared", category:"TO ARRIVE"},
+  {word:"entered", category:"TO ARRIVE"},
+  {word:"devoured", category:"TO EAT"},
+  {word:"stormed", category:"TO ATTACK"},
+  {word:"busted", category:"TO BREAK"},
+  {word:"bagged", category:"TO CATCH"},
+  {word:"followed", category:"TO CHASE"},
+  {word:"chowed", category:"TO EAT"},
+  {word:"hailed", category:"TO CHANGE"},
+];
+
+const idiomExercises = [
+  {phrase:"A hot topic", meaning:"Speak of an issue which many people are talking about"},
+  {phrase:"A penny for your thoughts", meaning:"A way of asking what someone is thinking"},
+  {phrase:"Actions speak louder than words", meaning:"People's intentions can be judged better by what they do"},
+  {phrase:"Add insult to injury", meaning:"To worsen an unfavourable situation"},
+  {phrase:"An arm and a leg", meaning:"Very expensive or costly"},
+  {phrase:"Back to the drawing board", meaning:"Start over after a failure"},
+  {phrase:"Barking up the wrong tree", meaning:"Accusing the wrong person"},
+  {phrase:"Cry over spilt milk", meaning:"Complaining about past losses"},
+  {phrase:"Hit the nail on the head", meaning:"Do or say something exactly right"},
+  {phrase:"Piece of cake", meaning:"Something very easy to do"}
+];
+
+const formativeExercises = [...verbExercises, ...vocabExercises, ...idiomExercises];
+
+/* --- STATE --- */
+let currentType = "";
+let currentExercise = 0;
+let score = 0;
+
+/* --- ID MAPPING --- */
+function getQuestionContainerId(type){
+  if(type==="verbs") return "verb-question";
+  if(type==="vocab") return "vocab-question";
+  if(type==="idioms") return "idiom-question";
+  if(type==="formative") return "formative-question";
+  return "";
+}
+
+function startExercise(type){
+  currentType = type;
+  currentExercise = 0;
+  score = 0;
+
+  document.getElementById(`${type}-home`).style.display="none";
+  document.getElementById(`${type}-exercise`).style.display="block";
+  showQuestion();
+}
+
+function getCurrentArray(){
+  if(currentType==="verbs") return verbExercises;
+  if(currentType==="vocab") return vocabExercises;
+  if(currentType==="idioms") return idiomExercises;
+  if(currentType==="formative") return formativeExercises;
+  return [];
+}
+
+function showQuestion(){
+  const arr = getCurrentArray();
+  const containerId = getQuestionContainerId(currentType);
+
+  if(currentExercise >= arr.length){
+    document.getElementById(containerId).innerHTML = `<p>Exercise finished! Your score: ${score}/${arr.length}</p>`;
+    return;
+  }
+
+  document.getElementById("progress").innerText = `Question ${currentExercise+1} of ${arr.length}`;
+  const ex = arr[currentExercise];
+  let html = "";
+
+  if(ex.verb){
+    html = `<p>Verb: <strong>${ex.verb}</strong></p>
+            <input id="pastInput" placeholder="Past simple">
+            <input id="partInput" placeholder="Past participle">
+            <p id="feedback"></p>`;
+  } else if(ex.word){
+    html = `<p>Word: <strong>${ex.word}</strong></p>
+            <select id="vocabInput">
+              <option value="">--Select Category--</option>
+              <option value="FAST MOVEMENT">FAST MOVEMENT</option>
+              <option value="MEDIUM-PACED MOVEMENT">MEDIUM-PACED MOVEMENT</option>
+              <option value="SLOW MOVEMENT">SLOW MOVEMENT</option>
+              <option value="ACTION VERBS TO PULL">ACTION VERBS TO PULL</option>
+              <option value="TO ARRIVE">TO ARRIVE</option>
+              <option value="TO EAT">TO EAT</option>
+              <option value="TO ATTACK">TO ATTACK</option>
+              <option value="TO BREAK">TO BREAK</option>
+              <option value="TO CATCH">TO CATCH</option>
+              <option value="TO CHANGE">TO CHANGE</option>
+              <option value="TO CHASE">TO CHASE</option>
+            </select>
+            <p id="feedback"></p>`;
+  } else if(ex.phrase){
+    html = `<p>Idiom: <strong>${ex.phrase}</strong></p>
+            <select id="idiomInput">
+              <option value="">--Select Meaning--</option>
+              ${idiomExercises.map(x=>`<option value="${x.meaning}">${x.meaning}</option>`).join('')}
+            </select>
+            <p id="feedback"></p>`;
+  }
+
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function submitAnswer(){
+  const arr = getCurrentArray();
+  const containerId = getQuestionContainerId(currentType);
+
+  if(currentExercise >= arr.length) return;
+  const ex = arr[currentExercise];
+  let correct = false;
+
+  if(ex.verb){
+    const pastVal = document.getElementById('pastInput').value.trim().toLowerCase();
+    const partVal = document.getElementById('partInput').value.trim().toLowerCase();
+    if(pastVal===ex.past && partVal===ex.participle) correct=true;
+  } else if(ex.word){
+    const val = document.getElementById('vocabInput').value;
+    if(val===ex.category) correct=true;
+  } else if(ex.phrase){
+    const val = document.getElementById('idiomInput').value;
+    if(val===ex.meaning) correct=true;
+  }
+
+  const feedback = document.querySelector(`#${containerId} #feedback`);
+  if(correct){
+    feedback.innerHTML="✅ Correct!";
+    feedback.className="correct";
+    score++;
+  } else {
+    feedback.innerHTML="❌ Wrong!";
+    feedback.className="wrong";
+  }
+
+  currentExercise++;
+  setTimeout(showQuestion, 800);
+}
+
+function quitExercise(){
+  document.getElementById(`${currentType}-exercise`).style.display="none";
+  document.getElementById(`${currentType}-home`).style.display="block";
+}
+</script>
+</body>
+</html>
+
+
+
+
+
+
+All rights reserved. No part of this code can be used for commercial purposes without permission.
+- © Jecko
