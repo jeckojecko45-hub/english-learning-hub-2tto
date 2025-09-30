@@ -30,10 +30,10 @@ select,input { padding:5px; border-radius:5px; border:1px solid #ccc; margin:5px
 
 <main>
   <nav class="tab-nav">
-    <button onclick="showTab('verbs-tab')" class="active">Irregular Verbs</button>
-    <button onclick="showTab('vocab-tab')">Vocabulary</button>
-    <button onclick="showTab('idioms-tab')">Idioms</button>
-    <button onclick="showTab('formative-tab')">Formative Test</button>
+    <button onclick="showTab('verbs-tab', event)" class="active">Irregular Verbs</button>
+    <button onclick="showTab('vocab-tab', event)">Vocabulary</button>
+    <button onclick="showTab('idioms-tab', event)">Idioms</button>
+    <button onclick="showTab('formative-tab', event)">Formative Test</button>
   </nav>
 
   <!-- IRREGULAR VERBS -->
@@ -106,12 +106,19 @@ select,input { padding:5px; border-radius:5px; border:1px solid #ccc; margin:5px
 </main>
 
 <script>
+/* --- UTILS --- */
+function shuffleArray(arr){
+  return arr.map(a=>({sort:Math.random(),value:a}))
+            .sort((a,b)=>a.sort-b.sort)
+            .map(a=>a.value);
+}
+
 /* --- TAB FUNCTION --- */
-function showTab(id){
+function showTab(id, event){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.tab-nav button').forEach(btn=>btn.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if(event) event.currentTarget.classList.add('active');
 }
 
 /* --- EXERCISES --- */
@@ -154,7 +161,7 @@ const vocabExercises = [
   {word:"bagged", category:"TO CATCH"},
   {word:"followed", category:"TO CHASE"},
   {word:"chowed", category:"TO EAT"},
-  {word:"hailed", category:"TO CHANGE"},
+  {word:"hailed", category:"TO CHANGE"}
 ];
 
 const idiomExercises = [
@@ -176,6 +183,7 @@ const formativeExercises = [...verbExercises, ...vocabExercises, ...idiomExercis
 let currentType = "";
 let currentExercise = 0;
 let score = 0;
+let currentArray = [];
 
 /* --- ID MAPPING --- */
 function getQuestionContainerId(type){
@@ -188,24 +196,23 @@ function getQuestionContainerId(type){
 
 function startExercise(type){
   currentType = type;
-  currentExercise = 0;
   score = 0;
+
+  // fresh shuffled copy
+  if(type==="verbs") currentArray = shuffleArray([...verbExercises]);
+  if(type==="vocab") currentArray = shuffleArray([...vocabExercises]);
+  if(type==="idioms") currentArray = shuffleArray([...idiomExercises]);
+  if(type==="formative") currentArray = shuffleArray([...formativeExercises]);
+
+  currentExercise = 0;
 
   document.getElementById(`${type}-home`).style.display="none";
   document.getElementById(`${type}-exercise`).style.display="block";
   showQuestion();
 }
 
-function getCurrentArray(){
-  if(currentType==="verbs") return verbExercises;
-  if(currentType==="vocab") return vocabExercises;
-  if(currentType==="idioms") return idiomExercises;
-  if(currentType==="formative") return formativeExercises;
-  return [];
-}
-
 function showQuestion(){
-  const arr = getCurrentArray();
+  const arr = currentArray;
   const containerId = getQuestionContainerId(currentType);
 
   if(currentExercise >= arr.length){
@@ -223,27 +230,23 @@ function showQuestion(){
             <input id="partInput" placeholder="Past participle">
             <p id="feedback"></p>`;
   } else if(ex.word){
+    const categories = shuffleArray([
+      "FAST MOVEMENT","MEDIUM-PACED MOVEMENT","SLOW MOVEMENT",
+      "ACTION VERBS TO PULL","TO ARRIVE","TO EAT",
+      "TO ATTACK","TO BREAK","TO CATCH","TO CHANGE","TO CHASE"
+    ]);
     html = `<p>Word: <strong>${ex.word}</strong></p>
             <select id="vocabInput">
               <option value="">--Select Category--</option>
-              <option value="FAST MOVEMENT">FAST MOVEMENT</option>
-              <option value="MEDIUM-PACED MOVEMENT">MEDIUM-PACED MOVEMENT</option>
-              <option value="SLOW MOVEMENT">SLOW MOVEMENT</option>
-              <option value="ACTION VERBS TO PULL">ACTION VERBS TO PULL</option>
-              <option value="TO ARRIVE">TO ARRIVE</option>
-              <option value="TO EAT">TO EAT</option>
-              <option value="TO ATTACK">TO ATTACK</option>
-              <option value="TO BREAK">TO BREAK</option>
-              <option value="TO CATCH">TO CATCH</option>
-              <option value="TO CHANGE">TO CHANGE</option>
-              <option value="TO CHASE">TO CHASE</option>
+              ${categories.map(c=>`<option value="${c}">${c}</option>`).join('')}
             </select>
             <p id="feedback"></p>`;
   } else if(ex.phrase){
+    const options = shuffleArray(idiomExercises.map(x=>x.meaning));
     html = `<p>Idiom: <strong>${ex.phrase}</strong></p>
             <select id="idiomInput">
               <option value="">--Select Meaning--</option>
-              ${idiomExercises.map(x=>`<option value="${x.meaning}">${x.meaning}</option>`).join('')}
+              ${options.map(m=>`<option value="${m}">${m}</option>`).join('')}
             </select>
             <p id="feedback"></p>`;
   }
@@ -252,17 +255,17 @@ function showQuestion(){
 }
 
 function submitAnswer(){
-  const arr = getCurrentArray();
+  const arr = currentArray;
   const containerId = getQuestionContainerId(currentType);
-
   if(currentExercise >= arr.length) return;
+
   const ex = arr[currentExercise];
   let correct = false;
 
   if(ex.verb){
     const pastVal = document.getElementById('pastInput').value.trim().toLowerCase();
     const partVal = document.getElementById('partInput').value.trim().toLowerCase();
-    if(pastVal===ex.past && partVal===ex.participle) correct=true;
+    if(pastVal===ex.past.toLowerCase() && partVal===ex.participle.toLowerCase()) correct=true;
   } else if(ex.word){
     const val = document.getElementById('vocabInput').value;
     if(val===ex.category) correct=true;
@@ -282,7 +285,7 @@ function submitAnswer(){
   }
 
   currentExercise++;
-  setTimeout(showQuestion, 800);
+  setTimeout(showQuestion, 900);
 }
 
 function quitExercise(){
@@ -293,10 +296,7 @@ function quitExercise(){
 </body>
 </html>
 
-
-
-
-
-
+<!-- 
 All rights reserved. No part of this code can be used for commercial purposes without permission.
-- © Jecko
+© Jecko
+-->
