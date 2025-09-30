@@ -115,13 +115,14 @@ function shuffleArray(arr){
 
 /* --- TAB FUNCTION --- */
 function showTab(id, event){
+  quitExercise(true);
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.tab-nav button').forEach(btn=>btn.classList.remove('active'));
   if(event) event.currentTarget.classList.add('active');
 }
 
-/* --- EXERCISES --- */
+/* --- DATA --- */
 const verbExercises = [
   {verb:"arise", past:"arose", participle:"arisen"},
   {verb:"begin", past:"began", participle:"begun"},
@@ -185,7 +186,7 @@ let currentExercise = 0;
 let score = 0;
 let currentArray = [];
 
-/* --- ID MAPPING --- */
+/* --- HELPERS --- */
 function getQuestionContainerId(type){
   if(type==="verbs") return "verb-question";
   if(type==="vocab") return "vocab-question";
@@ -194,23 +195,23 @@ function getQuestionContainerId(type){
   return "";
 }
 
+/* --- START --- */
 function startExercise(type){
   currentType = type;
   score = 0;
 
-  // fresh shuffled copy
   if(type==="verbs") currentArray = shuffleArray([...verbExercises]);
   if(type==="vocab") currentArray = shuffleArray([...vocabExercises]);
   if(type==="idioms") currentArray = shuffleArray([...idiomExercises]);
   if(type==="formative") currentArray = shuffleArray([...formativeExercises]);
 
   currentExercise = 0;
-
   document.getElementById(`${type}-home`).style.display="none";
   document.getElementById(`${type}-exercise`).style.display="block";
   showQuestion();
 }
 
+/* --- SHOW QUESTION --- */
 function showQuestion(){
   const arr = currentArray;
   const containerId = getQuestionContainerId(currentType);
@@ -254,7 +255,9 @@ function showQuestion(){
   document.getElementById(containerId).innerHTML = html;
 }
 
+/* --- SUBMIT --- */
 function submitAnswer(){
+  if(!currentType) return;
   const arr = currentArray;
   const containerId = getQuestionContainerId(currentType);
   if(currentExercise >= arr.length) return;
@@ -275,28 +278,39 @@ function submitAnswer(){
   }
 
   const feedback = document.querySelector(`#${containerId} #feedback`);
-  if(correct){
-    feedback.innerHTML="✅ Correct!";
-    feedback.className="correct";
-    score++;
-  } else {
-    feedback.innerHTML="❌ Wrong!";
-    feedback.className="wrong";
+  if(feedback){
+    if(correct){
+      feedback.innerHTML="✅ Correct!";
+      feedback.className="correct";
+      score++;
+    } else {
+      feedback.innerHTML="❌ Wrong!";
+      feedback.className="wrong";
+    }
   }
 
   currentExercise++;
   setTimeout(showQuestion, 900);
 }
 
-function quitExercise(){
-  document.getElementById(`${currentType}-exercise`).style.display="none";
-  document.getElementById(`${currentType}-home`).style.display="block";
+/* --- QUIT --- */
+function quitExercise(isTabSwitch=false){
+  if(currentType){
+    document.getElementById(`${currentType}-exercise`).style.display="none";
+    document.getElementById(`${currentType}-home`).style.display="block";
+  }
+  if(!isTabSwitch){
+    currentType = "";
+    currentArray = [];
+    currentExercise = 0;
+    score = 0;
+  }
 }
 </script>
 </body>
 </html>
 
-<!-- 
+<!--
 All rights reserved. No part of this code can be used for commercial purposes without permission.
 © Jecko
 -->
